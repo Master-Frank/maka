@@ -459,6 +459,14 @@ describe('ToolAvailabilityRuntime — search activation', () => {
     assert.ok(!secondPlan.activeTools.includes('browser_click'));
   });
 
+  test('a shared activation map keeps schemas visible for a later prepare', async () => {
+    const shared = new Map<string, string>();
+    const firstPlan = runtime().prepare(shared);
+    await searchTool(firstPlan).impl({ query: 'browser click' }, ctx);
+    const laterPlan = runtime().prepare(shared);
+    assert.ok(laterPlan.activeTools.includes('browser_click'));
+  });
+
   test('an ungrouped bound tool is deferred by default', () => {
     const plan = new ToolAvailabilityRuntime(
       [tool('Read'), tool('future_tool')],
