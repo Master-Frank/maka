@@ -449,6 +449,27 @@ describe('ToolAvailabilityRuntime — search activation', () => {
     assert.ok(plan.projectActiveTools!().activeTools.includes('docs_read'));
   });
 
+  test('request_sandbox_boundary stays deferred until required', () => {
+    const plan = new ToolAvailabilityRuntime(
+      [tool('Read'), tool('request_sandbox_boundary')],
+      {},
+      invalid,
+    ).prepare(new Map());
+    assert.ok(!plan.activeTools.includes('request_sandbox_boundary'));
+    assert.match(searchTool(plan).description, /- request_sandbox_boundary/);
+  });
+
+  test('required request_sandbox_boundary is visible without changing activation state', () => {
+    const active = new Map<string, string>();
+    const plan = new ToolAvailabilityRuntime(
+      [tool('Read'), tool('request_sandbox_boundary')],
+      {},
+      invalid,
+    ).prepare(active, new Set(['request_sandbox_boundary']));
+    assert.ok(plan.activeTools.includes('request_sandbox_boundary'));
+    assert.equal(active.size, 0);
+  });
+
   test('activation maps isolate overlapping and subsequent turns', async () => {
     const first = new Map<string, string>();
     const firstPlan = runtime().prepare(first);
