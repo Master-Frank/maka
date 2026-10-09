@@ -321,6 +321,14 @@ export class AiSdkBackend implements AgentBackend {
    * read back as absent.
    */
   private readonly activeTurns = new Set<AiSdkTurn>();
+  /**
+   * Deferred-tool activations for this Session backend. `tool_search` only
+   * adds names; Turn end and compaction do not clear them. Clearing at Turn
+   * end would change the provider tool list and miss the prompt cache on the
+   * next Turn. Compaction already invalidates that cache, so clearing there
+   * would change the prefix a second time. A rebuilt backend starts empty.
+   */
+  private readonly sessionActiveTools = new Map<string, string>();
   private readonly compaction: AiSdkCompaction;
   private readonly turnSessionState: AiSdkSessionState = {};
   constructor(input: AiSdkBackendInput) {
@@ -542,6 +550,7 @@ export class AiSdkBackend implements AgentBackend {
         providerTelemetry: this.providerTelemetry,
         compaction: this.compaction,
         snapshotToolAvailability: () => this.snapshotToolAvailability(),
+        sessionActiveTools: this.sessionActiveTools,
         codeCellAdmission: this.codeCellAdmission,
         resolvedProviderOptions: this.resolvedProviderOptions,
         session: this.turnSessionState,
