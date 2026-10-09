@@ -609,7 +609,8 @@ function providerRetryDelayMs(failedAttempt: number, retryAfterMs?: number): num
  * Each turn owns its ToolRuntime for the same reason: gating, the loop gate,
  * the subagent and child-run limiters, durable attempts, and step admission are
  * all per-turn facts. Deferred-tool activation is the exception: it lives on
- * the Session backend so later Turns keep the same provider tool list.
+ * the Session backend so later Turns — and concurrent Runs on the same
+ * backend — keep the same provider tool list.
  */
 
 export class AiSdkTurn {

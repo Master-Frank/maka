@@ -326,7 +326,9 @@ export class AiSdkBackend implements AgentBackend {
    * adds names; Turn end and compaction do not clear them. Clearing at Turn
    * end would change the provider tool list and miss the prompt cache on the
    * next Turn. Compaction already invalidates that cache, so clearing there
-   * would change the prefix a second time. A rebuilt backend starts empty.
+   * would change the prefix a second time. Concurrent Runs on this backend
+   * share the map, so a search in one Run is visible on a sibling Run's next
+   * step. A rebuilt backend starts empty.
    */
   private readonly sessionActiveTools = new Map<string, string>();
   private readonly compaction: AiSdkCompaction;

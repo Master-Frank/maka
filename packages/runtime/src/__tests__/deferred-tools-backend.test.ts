@@ -81,6 +81,7 @@ function backend(input: {
   toolAvailability?: ToolAvailabilityConfig;
   fullSurface?: boolean;
   resolveTools?: () => readonly MakaTool[];
+  extraTools?: readonly MakaTool[];
   loadTurnRuntimeEvents?: ReturnType<typeof createDurableTurnHarness>['loadTurnRuntimeEvents'];
 }): AiSdkBackend {
   let id = 0;
@@ -91,7 +92,7 @@ function backend(input: {
     apiKey: 'sk-test',
     modelId: 'mock-model-id',
     modelFactory: () => input.model,
-    tools: boundTools(input.calls),
+    tools: [...boundTools(input.calls), ...(input.extraTools ?? [])],
     ...(input.resolveTools ? { resolveTools: input.resolveTools } : {}),
     ...(input.fullSurface ? {} : { toolAvailability: input.toolAvailability ?? availability }),
     ...(input.loadTurnRuntimeEvents

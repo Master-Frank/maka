@@ -449,7 +449,7 @@ describe('ToolAvailabilityRuntime — search activation', () => {
     assert.ok(plan.projectActiveTools!().activeTools.includes('docs_read'));
   });
 
-  test('activation maps isolate overlapping and subsequent turns', async () => {
+  test('distinct activation maps isolate overlapping prepares', async () => {
     const first = new Map<string, string>();
     const firstPlan = runtime().prepare(first);
     await searchTool(firstPlan).impl({ query: 'browser click' }, ctx);
