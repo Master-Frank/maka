@@ -197,7 +197,7 @@ describe('ToolAvailabilityRuntime — search activation', () => {
     const plan = new ToolAvailabilityRuntime(
       [
         tool('request_sandbox_boundary', 'Request a sandbox boundary change'),
-        tool('todo_read', 'Read the session todo list'),
+        tool('request_sandbox_boundary_status', 'Report sandbox boundary status'),
         tool('mcp__memory__read_graph', 'Read the memory graph'),
         tool('RecallMaterial', 'Recall stored material'),
       ],
@@ -216,7 +216,7 @@ describe('ToolAvailabilityRuntime — search activation', () => {
     const plan = new ToolAvailabilityRuntime(
       [
         tool('request_sandbox_boundary', 'Request a sandbox boundary change'),
-        tool('todo_read', 'Read the session todo list'),
+        tool('request_sandbox_boundary_status', 'Report sandbox boundary status'),
         tool('mcp__memory__read_graph', 'Read the memory graph'),
       ],
       {},
