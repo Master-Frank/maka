@@ -86,6 +86,7 @@ function backend(input: {
   fullSurface?: boolean;
   resolveTools?: () => readonly MakaTool[];
   extraTools?: readonly MakaTool[];
+  loadTurnRuntimeEvents?: ReturnType<typeof createDurableTurnHarness>['loadTurnRuntimeEvents'];
 }): AiSdkBackend {
   let id = 0;
   return createTestAiSdkBackend({
@@ -98,7 +99,11 @@ function backend(input: {
     tools: [...boundTools(input.calls), ...(input.extraTools ?? [])],
     ...(input.resolveTools ? { resolveTools: input.resolveTools } : {}),
     ...(input.fullSurface ? {} : { toolAvailability: input.toolAvailability ?? availability }),
-    ...(input.durable ? { loadTurnRuntimeEvents: input.durable.loadTurnRuntimeEvents } : {}),
+    ...(input.loadTurnRuntimeEvents
+      ? { loadTurnRuntimeEvents: input.loadTurnRuntimeEvents }
+      : input.durable
+        ? { loadTurnRuntimeEvents: input.durable.loadTurnRuntimeEvents }
+        : {}),
     ...(input.traces ? { recordRunTrace: (event) => input.traces!.push(event) } : {}),
     newId: () => `id-${++id}`,
     now: () => 1,
@@ -195,34 +200,6 @@ describe('AiSdkBackend tool_search activation', () => {
     assert.ok(captured[1]?.includes('docs_read'));
   });
 
-  test('a bound request_sandbox_boundary stays visible without tool_search', async () => {
-    const captured: string[][] = [];
-    const instance = backend({
-      model: capturingModel(captured),
-      calls: [],
-      extraTools: [buildRequestSandboxBoundaryTool()],
-    });
-    await drain(
-      instance.send({
-        turnId: 'turn-1',
-        text: 'hi',
-        context: [],
-      }),
-    );
-    assert.ok(captured[0]?.includes(REQUEST_SANDBOX_BOUNDARY_TOOL_NAME));
-    assert.ok(captured[0]?.includes(TOOL_SEARCH_NAME));
-    assert.ok(!captured[0]?.includes('browser_click'));
-
-    await drain(
-      instance.send({
-        turnId: 'turn-2',
-        text: 'continue',
-        context: [],
-      }),
-    );
-    assert.ok(captured[1]?.includes(REQUEST_SANDBOX_BOUNDARY_TOOL_NAME));
-  });
-
   test('historical load_tools events never seed a new turn', async () => {
     const captured: string[][] = [];
     await drain(
@@ -266,6 +243,34 @@ describe('AiSdkBackend tool_search activation', () => {
     assert.ok(captured[0]?.includes('browser_click'));
     assert.ok(captured[0]?.includes('docs_read'));
     assert.ok(!captured[0]?.includes(TOOL_SEARCH_NAME));
+  });
+
+  test('a bound request_sandbox_boundary stays visible without tool_search', async () => {
+    const captured: string[][] = [];
+    const instance = backend({
+      model: capturingModel(captured),
+      calls: [],
+      extraTools: [buildRequestSandboxBoundaryTool()],
+    });
+    await drain(
+      instance.send({
+        turnId: 'turn-1',
+        text: 'hi',
+        context: [],
+      }),
+    );
+    assert.ok(captured[0]?.includes(REQUEST_SANDBOX_BOUNDARY_TOOL_NAME));
+    assert.ok(captured[0]?.includes(TOOL_SEARCH_NAME));
+    assert.ok(!captured[0]?.includes('browser_click'));
+
+    await drain(
+      instance.send({
+        turnId: 'turn-2',
+        text: 'continue',
+        context: [],
+      }),
+    );
+    assert.ok(captured[1]?.includes(REQUEST_SANDBOX_BOUNDARY_TOOL_NAME));
   });
 });
 
